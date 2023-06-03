@@ -12,12 +12,13 @@
             <view class="content" :class="{ finished: todo.finished }">{{
               todo.title
             }}</view>
-            <checkbox :checked="todo.finished" @click="clickTodo(index)"
-          /></view>
-          <!-- <view class="right">
-          <button>完成</button>
-          <button>重做</button>
-        </view> -->
+            <checkbox :checked="todo.finished" @click="clickTodo(index)" />
+            <!-- <button>删除</button> -->
+          </view>
+          <view class="right">
+            <button @click="del(index)">删除</button>
+            <!-- <button>重做</button> -->
+          </view>
         </view>
       </checkbox-group>
     </view>
@@ -28,7 +29,7 @@
 </template>
 
 <script setup>
-import { uni } from "@dcloudio/uni-h5";
+// import { uni } from "@dcloudio/uni-h5";
 import { onMounted, reactive } from "vue";
 
 const todoList = reactive([]);
@@ -66,6 +67,11 @@ const clickTodo = (index) => {
     todo.finished = true;
     todoList.push(todo);
   }
+  save();
+};
+
+const del = (index) => {
+  todoList.splice(index, 1);
   save();
 };
 
