@@ -12,7 +12,7 @@
             <view class="content" :class="{ finished: todo.finished }">{{
               todo.title
             }}</view>
-            <checkbox v-model="todo.finished" @click="clickTodo(index)"
+            <checkbox :checked="todo.finished" @click="clickTodo(index)"
           /></view>
           <!-- <view class="right">
           <button>完成</button>
