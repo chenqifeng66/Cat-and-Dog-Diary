@@ -45,18 +45,37 @@
         </view>
       </view>
     </view>
-    <view class="add" @click="add">+</view>
+    <view class="add" @click="showInput = true">+</view>
+    <view class="add-modal" v-show="showInput">
+      <textarea
+        class="add-input"
+        v-model="todo.content"
+        auto-focus
+        fixed
+        placeholder="输入待办事项"
+        placeholder-style="color:#94adcf"
+      />
+      <button class="add-button" @click="addTodo">Add</button>
+    </view>
+
+    <view class="overlay" v-show="showInput" @click="showInput = false"></view>
     <view class="tip" v-if="empty"> <image :src="svg_empty"></image></view>
   </view>
 </template>
 
 <script setup>
-import { onMounted, reactive, computed } from "vue";
+import { onMounted, reactive, computed, ref } from "vue";
 import svg_clear from "@/static/clear.svg";
 import svg_empty from "@/static/empty.svg";
 
 const todoList = reactive([]);
 const completedList = reactive([]);
+const todo = reactive({
+  id: "",
+  content: "",
+  finished: false,
+});
+const showInput = ref(false);
 
 const empty = computed(() => {
   return !todoList.length && !completedList.length ? true : false;
@@ -69,21 +88,11 @@ onMounted(() => {
   if (completeds) completedList.push(...completeds);
 });
 
-const add = () => {
-  uni.showModal({
-    title: "提示",
-    editable: true,
-    success: function (res) {
-      if (res.confirm) {
-        todoList.push({
-          id: todoList.length.toString(),
-          content: res.content,
-          finished: false,
-        });
-        save();
-      }
-    },
-  });
+const addTodo = () => {
+  todo.id = todoList.length.toString();
+  todoList.push(todo);
+  save();
+  showInput.value = false;
 };
 
 const finished = (index) => {
@@ -151,6 +160,47 @@ page {
       -1px 1px 2px rgba(22, 26, 30, 0.2),
       inset -1px -1px 2px rgba(22, 26, 30, 0.5),
       inset 1px 1px 2px rgba(90, 102, 120, 0.3);
+  }
+
+  .overlay {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(3px);
+    z-index: 1;
+    transition: all 1s;
+  }
+
+  .add-modal {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: auto;
+    margin-top: 30%;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    .add-input {
+      width: 60%;
+      height: 5rem;
+      padding: 0.2rem;
+      border: 2px solid #94adcf;
+      border-radius: 0.5rem;
+    }
+    .add-button {
+      width: 60%;
+      margin-top: 1rem;
+      background: #38404b;
+      color: #fff;
+    }
   }
 
   .top {
