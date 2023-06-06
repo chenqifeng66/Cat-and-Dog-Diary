@@ -9,51 +9,69 @@
       <view class="incomplete" v-if="todoList.length">
         <view class="title">待办</view>
         <view class="todo-list">
-          <view
-            class="todo"
-            v-for="(item, index) in todoList"
-            :key="item.id"
-            @click="finished(index)"
-          >
-            <view class="checkbox"></view>
-            <view class="content">{{ item.content }}</view>
-            <image
-              class="clear"
-              :src="svg_clear"
-              @click.stop="delTodo(index)"
-            ></image>
-          </view>
+          <TransitionGroup name="list" tag="view">
+            <view
+              class="todo"
+              v-for="(item, index) in todoList"
+              :key="item.id"
+              @click="finished(index)"
+            >
+              <view class="checkbox"></view>
+              <view class="content">{{ item.content }}</view>
+              <image
+                v-if="index != 0"
+                class="svg"
+                :src="svg_top"
+                @click.stop="topTodo(index)"
+              ></image>
+              <image
+                class="svg"
+                :src="svg_clear"
+                @click.stop="delTodo(index)"
+              ></image>
+            </view>
+          </TransitionGroup>
         </view>
       </view>
       <!-- 已完成 -->
       <view class="completed" v-if="completedList.length">
         <view class="title">已完成</view>
         <view class="todo-list">
-          <view
-            class="todo"
-            v-for="(item, index) in completedList"
-            :key="item.id"
-          >
-            <view class="checkbox"></view>
-            <view class="content">{{ item.content }}</view>
-            <image
-              class="clear"
-              :src="svg_clear"
-              @click.stop="delComputed(index)"
-            ></image>
-          </view>
+          <TransitionGroup name="list" tag="view">
+            <view
+              class="todo"
+              v-for="(item, index) in completedList"
+              :key="item.id"
+            >
+              <view class="checkbox"></view>
+              <view class="content">{{ item.content }}</view>
+              <image
+                class="svg"
+                :src="svg_restore"
+                @click.stop="restoreTodo(index)"
+              ></image>
+              <image
+                class="svg"
+                :src="svg_clear"
+                @click.stop="delComputed(index)"
+              ></image>
+            </view>
+          </TransitionGroup>
         </view>
       </view>
     </view>
     <view class="add" @click="showInput = true">+</view>
-    <view class="add-modal" v-show="showInput">
+    <view class="add-modal" v-if="showInput">
       <textarea
         class="add-input"
         v-model="todo.content"
         auto-focus
         fixed
+        :show-confirm-bar="false"
+        confirm-type="done"
         placeholder="输入待办事项"
         placeholder-style="color:#94adcf"
+        @confirm="addTodo"
       />
       <button class="add-button" @click="addTodo">Add</button>
     </view>
@@ -65,8 +83,12 @@
 
 <script setup>
 import { onMounted, reactive, computed, ref } from "vue";
+// import "react-native-get-random-values";
+// import { v4 as uuidv4 } from "uuid";
 import svg_clear from "@/static/clear.svg";
 import svg_empty from "@/static/empty.svg";
+import svg_top from "@/static/top.svg";
+import svg_restore from "@/static/restore.svg";
 
 const todoList = reactive([]);
 const completedList = reactive([]);
@@ -88,11 +110,20 @@ onMounted(() => {
   if (completeds) completedList.push(...completeds);
 });
 
+const topTodo = (index) => {
+  const todo = todoList[index];
+  todoList.splice(index, 1);
+  todoList.unshift(todo);
+  save();
+};
+
 const addTodo = () => {
-  todo.id = todoList.length.toString();
-  todoList.push(todo);
+  if (!todo.content.trim()) return;
+  todo.id = (todoList.length + completedList.length).toString() + "todo";
+  todoList.push({ ...todo });
   save();
   showInput.value = false;
+  todo.content = "";
 };
 
 const finished = (index) => {
@@ -112,6 +143,13 @@ const delComputed = (index) => {
   save();
 };
 
+const restoreTodo = (index) => {
+  const todo = completedList[index];
+  completedList.splice(index, 1);
+  todoList.push(todo);
+  save();
+};
+
 const save = () => {
   uni.setStorageSync("todoList", todoList);
   uni.setStorageSync("completedList", completedList);
@@ -122,6 +160,33 @@ const save = () => {
 page {
   height: 100%;
   background: #38404b;
+}
+
+.list-move, /* 对移动中的元素应用的过渡 */
+.list-enter-active,
+.list-leave-active {
+  transition: all 0.5s ease;
+}
+
+.list-enter-from,
+.list-leave-to {
+  opacity: 0;
+  transform: translateX(30px);
+}
+
+/* 确保将离开的元素从布局流中删除
+  以便能够正确地计算移动的动画。 */
+.list-leave-active {
+  position: absolute;
+}
+
+@keyframes openModal {
+  from {
+    margin-top: 90%;
+  }
+  to {
+    margin-top: 30%;
+  }
 }
 .container {
   width: 100%;
@@ -154,6 +219,7 @@ page {
     text-align: center;
     line-height: 3.4rem;
     font-size: 3rem;
+    background: #38404b;
 
     box-shadow: 1px 1px 3px rgba(22, 26, 30, 0.9),
       -1px -1px 2px rgba(90, 102, 120, 0.9), 1px -1px 2px rgba(22, 26, 30, 0.2),
@@ -173,7 +239,6 @@ page {
     background: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(3px);
     z-index: 1;
-    transition: all 1s;
   }
 
   .add-modal {
@@ -184,22 +249,31 @@ page {
     right: 0;
     margin: auto;
     margin-top: 30%;
+    height: 20%;
+    width: 60%;
     z-index: 2;
     display: flex;
     flex-direction: column;
     align-items: center;
+    animation: 0.3s ease-in 1 openModal;
+
     .add-input {
-      width: 60%;
+      width: 100%;
       height: 5rem;
       padding: 0.2rem;
       border: 2px solid #94adcf;
       border-radius: 0.5rem;
     }
     .add-button {
-      width: 60%;
+      width: 100%;
+      height: 3rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
       margin-top: 1rem;
       background: #38404b;
       color: #fff;
+      font-weight: 500;
     }
   }
 
@@ -262,10 +336,10 @@ page {
             word-wrap: break-word;
             word-break: break-all;
           }
-          .clear {
+          .svg {
             width: 1.2rem;
             height: 1.2rem;
-            margin: 0 0.5rem;
+            margin: 0 0.3rem;
           }
         }
       }

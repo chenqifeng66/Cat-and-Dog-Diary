@@ -52,6 +52,8 @@
     "@dcloudio/uni-mp-toutiao": "3.0.0-3080420230531001",
     "@dcloudio/uni-mp-weixin": "3.0.0-3080420230531001",
     "@dcloudio/uni-quickapp-webview": "3.0.0-3080420230531001",
+    "react-native-get-random-values": "^1.9.0",
+    "uuid": "^9.0.0",
     "vue": "^3.2.45",
     "vue-i18n": "^9.1.9"
   },
