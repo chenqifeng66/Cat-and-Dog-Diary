@@ -8,55 +8,71 @@
       <!-- 待办 -->
       <view class="incomplete" v-if="todoList.length">
         <view class="title">待办</view>
-        <view class="todo-list">
-          <TransitionGroup name="list" tag="view">
-            <view
-              class="todo"
-              v-for="(item, index) in todoList"
-              :key="item.id"
-              @click="finished(index)"
-            >
-              <view class="checkbox"></view>
-              <view class="content">{{ item.content }}</view>
-              <image
-                v-if="index != 0"
-                class="svg"
-                :src="svg_top"
-                @click.stop="topTodo(index)"
-              ></image>
-              <image
-                class="svg"
-                :src="svg_clear"
-                @click.stop="delTodo(index)"
-              ></image>
-            </view>
-          </TransitionGroup>
+        <view class="todo-list" ref="todoListRef">
+          <view
+            :class="{
+              'todo-leave': !delHandle.isCompleted && delHandle.index == index,
+              'todo-up':
+                !delHandle.isCompleted &&
+                delHandle.index != -1 &&
+                index > delHandle.index,
+            }"
+            class="todo"
+            v-for="(item, index) in todoList"
+            :key="item.id"
+            @click="finished(index)"
+          >
+            <view class="checkbox"></view>
+            <view class="content">{{ item.content }}</view>
+            <image
+              class="svg"
+              :src="svg_top"
+              :class="{ 'svg-disable': index == 0 }"
+              @click.stop="topTodo(index)"
+            ></image>
+            <image
+              class="svg"
+              :src="svg_clear"
+              @click.stop="delTodo(index, $event)"
+            ></image>
+          </view>
         </view>
       </view>
       <!-- 已完成 -->
-      <view class="completed" v-if="completedList.length">
+      <view
+        class="completed"
+        v-if="completedList.length"
+        :class="{
+          'todo-up': !delHandle.isCompleted && delHandle.index != -1,
+        }"
+      >
         <view class="title">已完成</view>
         <view class="todo-list">
-          <TransitionGroup name="list" tag="view">
-            <view
-              class="todo"
-              v-for="(item, index) in completedList"
-              :key="item.id"
-            >
-              <view class="checkbox"></view>
-              <view class="content">{{ item.content }}</view>
-              <image
-                class="svg"
-                :src="svg_restore"
-                @click.stop="restoreTodo(index)"
-              ></image>
-              <image
-                class="svg"
-                :src="svg_clear"
-                @click.stop="delComputed(index)"
-              ></image>
-            </view>
-          </TransitionGroup>
+          <view
+            :class="{
+              'todo-leave': delHandle.isCompleted && delHandle.index == index,
+              'todo-up':
+                delHandle.isCompleted &&
+                delHandle.index != -1 &&
+                index > delHandle.index,
+            }"
+            class="todo"
+            v-for="(item, index) in completedList"
+            :key="item.id"
+          >
+            <view class="checkbox"></view>
+            <view class="content">{{ item.content }}</view>
+            <image
+              class="svg"
+              :src="svg_restore"
+              @click.stop="restoreTodo(index)"
+            ></image>
+            <image
+              class="svg"
+              :src="svg_clear"
+              @click.stop="delComputed(index)"
+            ></image>
+          </view>
         </view>
       </view>
     </view>
@@ -89,6 +105,8 @@ import svg_clear from "@/static/clear.svg";
 import svg_empty from "@/static/empty.svg";
 import svg_top from "@/static/top.svg";
 import svg_restore from "@/static/restore.svg";
+import { nextTick } from "vue";
+import { watch } from "vue";
 
 const todoList = reactive([]);
 const completedList = reactive([]);
@@ -98,9 +116,42 @@ const todo = reactive({
   finished: false,
 });
 const showInput = ref(false);
+const todoListRef = ref(null);
+const delHandle = reactive({
+  isCompleted: false,
+  index: -1,
+});
+const topIndex = ref(-1);
+const upDistance = ref(0);
+let todoListNode = [];
+let completedListNode = [];
 
 const empty = computed(() => {
   return !todoList.length && !completedList.length ? true : false;
+});
+
+watch(todoList, () => {
+  nextTick(() => {
+    uni
+      .createSelectorQuery()
+      .selectAll(".incomplete .todo")
+      .boundingClientRect((data) => {
+        todoListNode = data;
+      })
+      .exec();
+  });
+});
+
+watch(completedList, () => {
+  nextTick(() => {
+    uni
+      .createSelectorQuery()
+      .selectAll(".completed .todo")
+      .boundingClientRect((data) => {
+        completedListNode = data;
+      })
+      .exec();
+  });
 });
 
 onMounted(() => {
@@ -108,6 +159,15 @@ onMounted(() => {
   const completeds = uni.getStorageSync("completedList");
   if (todos) todoList.push(...todos);
   if (completeds) completedList.push(...completeds);
+  nextTick(() => {
+    uni
+      .createSelectorQuery()
+      .selectAll(".incomplete .todo")
+      .boundingClientRect((data) => {
+        todoListNode = data;
+      })
+      .exec();
+  });
 });
 
 const topTodo = (index) => {
@@ -133,14 +193,39 @@ const finished = (index) => {
   save();
 };
 
-const delTodo = (index) => {
-  todoList.splice(index, 1);
-  save();
+const delTodo = (index, e) => {
+  delHandle.isCompleted = false;
+  delHandle.index = index;
+
+  // 是否是最后一个元素
+  if (index != todoList.length - 1) {
+    // 不是 下面的元素上移
+    upDistance.value = todoListNode[index + 1].top - todoListNode[index].top;
+  }
+
+  setTimeout(() => {
+    delHandle.index = -1;
+    todoList.splice(index, 1);
+    // save();
+  }, 500);
 };
 
 const delComputed = (index) => {
-  completedList.splice(index, 1);
-  save();
+  delHandle.isCompleted = true;
+  delHandle.index = index;
+
+  // 是否是最后一个元素
+  if (index != completedList.length - 1) {
+    // 不是 下面的元素上移
+    upDistance.value =
+      completedListNode[index + 1].top - completedListNode[index].top;
+  }
+
+  setTimeout(() => {
+    delHandle.index = -1;
+    completedList.splice(index, 1);
+    // save();
+  }, 500);
 };
 
 const restoreTodo = (index) => {
@@ -162,22 +247,19 @@ page {
   background: #38404b;
 }
 
-.list-move, /* 对移动中的元素应用的过渡 */
-.list-enter-active,
-.list-leave-active {
-  transition: all 0.5s ease;
-}
-
-.list-enter-from,
-.list-leave-to {
+.svg-disable {
   opacity: 0;
-  transform: translateX(30px);
 }
 
-/* 确保将离开的元素从布局流中删除
-  以便能够正确地计算移动的动画。 */
-.list-leave-active {
-  position: absolute;
+.todo-leave {
+  transition: all 0.5s;
+  transform: translateX(100px);
+  opacity: 0;
+}
+
+.todo-up {
+  transition: all 0.5s;
+  transform: translateY(calc(-1px * v-bind(upDistance)));
 }
 
 @keyframes openModal {
@@ -335,6 +417,7 @@ page {
             flex: 1;
             word-wrap: break-word;
             word-break: break-all;
+            letter-spacing: 1px;
           }
           .svg {
             width: 1.2rem;
