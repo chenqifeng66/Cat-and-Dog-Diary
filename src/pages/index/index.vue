@@ -77,6 +77,8 @@
       </view>
     </view>
     <view class="add" @click="showInput = true">+</view>
+    <button open-type="openSetting">打开授权设置</button>
+    <button @click="addTestCalendar">添加测试日历</button>
     <view class="add-modal" v-if="showInput">
       <textarea
         class="add-input"
@@ -89,6 +91,7 @@
         placeholder-style="color:#94adcf"
         @confirm="addTodo"
       />
+
       <button class="add-button" @click="addTodo">Add</button>
     </view>
 
@@ -167,6 +170,19 @@ onMounted(() => {
         todoListNode = data;
       })
       .exec();
+  });
+  wx.getSetting({
+    success(res) {
+      if (!res.authSetting["scope.addPhoneCalendar"]) {
+        wx.authorize({
+          scope: "scope.addPhoneCalendar",
+          success(res) {},
+          fail(err) {
+            console.log(err);
+          },
+        });
+      }
+    },
   });
 });
 

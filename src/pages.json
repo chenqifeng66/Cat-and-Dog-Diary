@@ -1,16 +1,25 @@
 {
-	"pages": [ 
-		{
-			"path": "pages/index/index",
-			"style": {
-				"navigationBarTitleText": "Todo"
-			}
-		}
-	],
-	"globalStyle": {
-		"navigationBarTextStyle": "white",
-		"navigationBarTitleText": "Todo",
-		"navigationBarBackgroundColor": "#38404b",
-		"backgroundColor": "#38404b"
-	}
+  "pages": [
+    // {
+    //   "path": "pages/home/home"
+    // },
+    {
+      "path": "pages/calendar/calendar",
+      "style": {
+        "navigationBarTitleText": "日历提醒"
+      }
+    }
+    // {
+    //   "path": "pages/index/index",
+    //   "style": {
+    //     "navigationBarTitleText": "Todo"
+    //   }
+    // }
+  ],
+  "globalStyle": {
+    "navigationBarTextStyle": "white",
+    "navigationBarTitleText": "Todo",
+    "navigationBarBackgroundColor": "#38404b",
+    "backgroundColor": "#38404b"
+  }
 }
