@@ -1,54 +1,93 @@
 <template>
-  <view>
-    <view>
-      <form @submit="formSubmit">
-        <view>
-          <view>事件名称</view>
-          <input value="提醒事项" name="title" placeholder="输入事件名称" />
-        </view>
-        <view>
-          <view>事件说明</view>
-          <input name="description" placeholder="输入事件说明" />
-        </view>
-        <view>
-          <view>提醒时间</view>
-          <picker
-            name="time"
-            mode="multiSelector"
-            :value="state.dateIndex"
-            :range="state.date"
-            @change="onDateChange"
-            @columnchange="onColumnchange"
-          >
-            <view>{{ selectedDate }}</view>
-          </picker>
-        </view>
-        <view>
-          <view>是否为全天事件</view>
-          <view>
-            <switch name="allDay" />
-          </view>
-        </view>
-        <view>
-          <button form-type="submit">设置提醒</button>
-          <!-- <button @click="subscribeMsg">订阅消息</button> -->
-        </view>
-      </form>
-    </view>
-  </view>
+  <div class="container">
+    <form @submit="formSubmit">
+      <div class="form-item">
+        <div class="label">名称：</div>
+        <input value="提醒" name="title" placeholder="输入事件名称" />
+      </div>
+      <div class="form-item">
+        <div class="label">备注：</div>
+        <input name="description" placeholder="输入事件说明" />
+      </div>
+      <div class="form-item">
+        <div class="label">时间：</div>
+        <picker
+          name="time"
+          mode="multiSelector"
+          :value="state.dateIndex"
+          :range="state.date"
+          @change="onDateChange"
+          @columnchange="onColumnchange"
+        >
+          <div>{{ selectedDate }}</div>
+        </picker>
+      </div>
+      <div class="form-item" style="display: none">
+        <div class="label">是否为全天事件</div>
+        <div>
+          <switch name="allDay" />
+        </div>
+      </div>
+      <div class="btn">
+        <button v-if="state.unauthorized" @click="openSetting">去授权</button>
+        <button form-type="submit">设置提醒</button>
+      </div>
+    </form>
+  </div>
 </template>
 
-<script setup>
-import { computed, reactive } from "vue";
+<script setup lang="ts">
+import { computed, reactive, onMounted } from "vue";
 
 const allHours = getAllHours();
 const allMinutes = getMinutes();
 const state = reactive({
   date: [["今天", "明天", "后天"], [], []],
   dateIndex: [0, 0, 0],
+  unauthorized: false,
 });
 
 initData();
+
+onMounted(() => {
+  getAuthority();
+});
+
+function getAuthority() {
+  wx.getSetting({
+    success(res) {
+      if (!res.authSetting["scope.addPhoneCalendar"]) {
+        wx.authorize({
+          scope: "scope.addPhoneCalendar",
+          fail(err) {
+            (state.unauthorized = true),
+              uni.showToast({
+                title: "请在设置中允许添加到日历",
+                icon: "none",
+                duration: 2000,
+              });
+            setTimeout(() => {
+              openSetting();
+            }, 2000);
+          },
+        });
+      }
+    },
+  });
+}
+
+function openSetting() {
+  wx.openSetting({
+    fail(err) {
+      console.log(err);
+    },
+    success(res) {
+      if (res.authSetting["scope.addPhoneCalendar"]) {
+        state.unauthorized = false;
+      }
+    },
+  });
+}
 
 /**
  * @description: 初始化时间选择器数据
@@ -126,13 +165,13 @@ function formSubmit(e) {
     if (firstColIndex !== 0) {
       date.setHours(24 * firstColIndex);
     }
-    const hour = state.date[1][secondColIndex].split(" ")[0];
+    const hour = parseInt(state.date[1][secondColIndex].split(" ")[0]);
     date.setHours(hour);
-    const minute = state.date[2][thirdColIndex].split(" ")[0];
+    const minute = parseInt(state.date[2][thirdColIndex].split(" ")[0]);
     date.setMinutes(minute);
     date.setSeconds(0);
 
-    const startTime = Date.parse(date) / 1000;
+    const startTime = Date.parse(date.toString()) / 1000;
     addTestCalendar({
       title,
       startTime,
@@ -168,7 +207,7 @@ function subscribeMsg() {
  * @param {string} description 事项备注
  * @param {boolean} allDay 是否全天事件
  */
-const addTestCalendar = ({ title, startTime, description, allDay }) => {
+const addTestCalendar = ({ title, startTime, description, allDay }): void => {
   wx.addPhoneCalendar({
     title,
     startTime,
@@ -183,6 +222,11 @@ const addTestCalendar = ({ title, startTime, description, allDay }) => {
     },
     fail(err) {
       console.log("错误", err);
+      uni.showToast({
+        title: err.errMsg,
+        icon: "none",
+        duration: 2000,
+      });
     },
   });
 };
@@ -249,3 +293,42 @@ function getCurrentMinutes() {
   return currentMinutes;
 }
 </script>
+
+<style lang="less">
+.container {
+  --font-color: #fff;
+  --theme-color: #000;
+
+  color: var(--font-color);
+  margin: 2rem;
+
+  .form-item {
+    display: flex;
+    align-items: center;
+    margin: 1rem 0;
+    .label {
+      margin-right: 0.5rem;
+    }
+    input {
+      border-bottom: 1px solid #fff;
+      height: 2rem;
+      text-indent: 5px;
+      flex: 1;
+    }
+  }
+
+  .btn {
+    position: fixed;
+    width: 50%;
+    bottom: 10rem;
+    left: 50%;
+    transform: translateX(-50%);
+
+    button {
+      margin-bottom: 0.2rem;
+      background-color: var(--theme-color);
+      color: var(--font-color);
+    }
+  }
+}
+</style>

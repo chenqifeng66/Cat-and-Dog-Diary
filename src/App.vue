@@ -18,7 +18,7 @@ export default {
   padding: 0;
   margin: 0;
 } */
-#app {
-  background: #38404b;
+page {
+  background: #28272a;
 }
 </style>

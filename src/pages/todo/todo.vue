@@ -2,7 +2,6 @@
   <view class="container">
     <view class="top">
       <view class="title">My Tasks</view>
-      <view class="options"></view>
     </view>
     <view class="main">
       <!-- 待办 -->
@@ -32,7 +31,7 @@
             ></image>
             <image
               class="svg"
-              :src="svg_clear"
+              :src="svg_delete"
               @click.stop="delTodo(index, $event)"
             ></image>
           </view>
@@ -69,7 +68,7 @@
             ></image>
             <image
               class="svg"
-              :src="svg_clear"
+              :src="svg_delete"
               @click.stop="delComputed(index)"
             ></image>
           </view>
@@ -77,8 +76,6 @@
       </view>
     </view>
     <view class="add" @click="showInput = true">+</view>
-    <button open-type="openSetting">打开授权设置</button>
-    <button @click="addTestCalendar">添加测试日历</button>
     <view class="add-modal" v-if="showInput">
       <textarea
         class="add-input"
@@ -88,7 +85,7 @@
         :show-confirm-bar="false"
         confirm-type="done"
         placeholder="输入待办事项"
-        placeholder-style="color:#94adcf"
+        placeholder-style="color:#fff"
         @confirm="addTodo"
       />
 
@@ -104,7 +101,7 @@
 import { onMounted, reactive, computed, ref } from "vue";
 // import "react-native-get-random-values";
 // import { v4 as uuidv4 } from "uuid";
-import svg_clear from "@/static/clear.svg";
+import svg_delete from "@/static/delete.svg";
 import svg_empty from "@/static/empty.svg";
 import svg_top from "@/static/top.svg";
 import svg_restore from "@/static/restore.svg";
@@ -170,19 +167,6 @@ onMounted(() => {
         todoListNode = data;
       })
       .exec();
-  });
-  wx.getSetting({
-    success(res) {
-      if (!res.authSetting["scope.addPhoneCalendar"]) {
-        wx.authorize({
-          scope: "scope.addPhoneCalendar",
-          success(res) {},
-          fail(err) {
-            console.log(err);
-          },
-        });
-      }
-    },
   });
 });
 
@@ -258,11 +242,6 @@ const save = () => {
 </script>
 
 <style lang="less">
-page {
-  height: 100%;
-  background: #38404b;
-}
-
 .svg-disable {
   opacity: 0;
 }
@@ -287,13 +266,16 @@ page {
   }
 }
 .container {
+  --bg-color: #28272a;
+  --font-color: #fff;
+  --theme-color: #000;
   width: 100%;
   height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  color: #94adcf;
+  color: var(--font-color);
   padding: 1.5rem;
   box-sizing: border-box;
 
@@ -317,7 +299,7 @@ page {
     text-align: center;
     line-height: 3.4rem;
     font-size: 3rem;
-    background: #38404b;
+    background: var(--bg-color);
 
     box-shadow: 1px 1px 3px rgba(22, 26, 30, 0.9),
       -1px -1px 2px rgba(90, 102, 120, 0.9), 1px -1px 2px rgba(22, 26, 30, 0.2),
@@ -359,7 +341,7 @@ page {
       width: 100%;
       height: 5rem;
       padding: 0.2rem;
-      border: 2px solid #94adcf;
+      border: 2px solid var(--font-color);
       border-radius: 0.5rem;
     }
     .add-button {
@@ -369,8 +351,8 @@ page {
       justify-content: center;
       align-items: center;
       margin-top: 1rem;
-      background: #38404b;
-      color: #fff;
+      background: var(--theme-color);
+      color: var(--font-color);
       font-weight: 500;
     }
   }
@@ -394,7 +376,7 @@ page {
         border-radius: 0.2rem;
         background: #94adcf;
         display: block;
-        box-shadow: 0 8px 0 0 #94adcf, 0 16px 0 0 #94adcf;
+        box-shadow: 0 8px 0 0 var(--font-color), 0 16px 0 0 var(--font-color);
       }
     }
   }
@@ -413,7 +395,7 @@ page {
         margin: 1rem 0;
         .todo {
           width: 100%;
-          box-shadow: 2px 2px 4px 0px #303640, -2px -2px 4px 0px #404a56;
+          background-color: #000;
           margin: 1rem 0;
           display: flex;
           align-items: center;
@@ -425,7 +407,7 @@ page {
           .checkbox {
             width: 0.5rem;
             height: 0.5rem;
-            border: 2px solid #94adcf;
+            border: 2px solid var(--font-color);
             border-radius: 50%;
             margin: 0 1rem;
           }
@@ -448,7 +430,7 @@ page {
       .todo-list {
         .todo {
           .checkbox {
-            background: #94adcf;
+            background: var(--font-color);
           }
           .content {
             text-decoration-line: line-through;
