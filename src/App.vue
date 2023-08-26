@@ -18,7 +18,12 @@ export default {
   padding: 0;
   margin: 0;
 } */
+
 page {
+  --bg-color: #28272a;
+  --theme-color: #000;
+  --font-color: #fff;
+
   background: #28272a;
 }
 </style>

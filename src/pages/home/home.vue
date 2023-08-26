@@ -1,21 +1,36 @@
 <template>
   <div class="card-group">
-    <div class="card" @click="goto('/pages/todo/todo')">
-      <image class="icon" src="@/static/todo.svg" />
-      <div class="name">待办事项</div>
-    </div>
-    <div class="card" @click="goto('/pages/calendar/calendar')">
-      <image class="icon" src="@/static/calendar.svg" />
-      <div class="name">日历提醒</div>
-    </div>
-    <div class="card" @click="goto('/pages/greedySnake/greedySnake')">
-      <image class="icon" src="@/static/snake.svg" />
-      <div class="name">贪吃蛇</div>
+    <div
+      class="card"
+      v-for="item in card"
+      :key="item.name"
+      @click="goto(item.url)"
+    >
+      <image class="icon" :src="'../../static/' + item.icon" />
+      <div class="name">{{ item.name }}</div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+const card = [
+  {
+    name: "待办事项",
+    icon: "todo.svg",
+    url: "/pages/todo/todo",
+  },
+  {
+    name: "日历提醒",
+    icon: "calendar.svg",
+    url: "/pages/calendar/calendar",
+  },
+  {
+    name: "贪吃蛇",
+    icon: "snake.svg",
+    url: "/pages/greedySnake/greedySnake",
+  },
+];
+
 function goto(url: string) {
   uni.navigateTo({
     url: url,
@@ -38,7 +53,7 @@ function goto(url: string) {
     justify-content: center;
     align-items: center;
     color: #fff;
-    margin-right: 0.5rem;
+    margin: 0 0.3rem 0.3rem 0;
     .icon {
       width: 3rem;
       height: 3rem;

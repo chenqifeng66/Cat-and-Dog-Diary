@@ -294,11 +294,8 @@ function getCurrentMinutes() {
 }
 </script>
 
-<style lang="less">
+<style lang="less" scoped>
 .container {
-  --font-color: #fff;
-  --theme-color: #000;
-
   color: var(--font-color);
   margin: 2rem;
 

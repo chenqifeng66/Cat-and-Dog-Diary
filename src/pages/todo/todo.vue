@@ -241,7 +241,7 @@ const save = () => {
 };
 </script>
 
-<style lang="less">
+<style lang="less" scoped>
 .svg-disable {
   opacity: 0;
 }
@@ -266,9 +266,6 @@ const save = () => {
   }
 }
 .container {
-  --bg-color: #28272a;
-  --font-color: #fff;
-  --theme-color: #000;
   width: 100%;
   height: 100%;
   display: flex;
