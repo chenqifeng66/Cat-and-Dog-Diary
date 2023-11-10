@@ -12,18 +12,23 @@ export default {
 };
 </script>
 
-<style>
+<style lang="less">
+// * {
+//   color: @my-text-color;
+// }
 /*每个页面公共css */
-/* * {
-  padding: 0;
-  margin: 0;
-} */
+::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+  color: transparent;
+}
 
 page {
   --bg-color: #28272a;
   --theme-color: #000;
   --font-color: #fff;
 
-  background: #28272a;
+  background: @my-background-color;
 }
 </style>

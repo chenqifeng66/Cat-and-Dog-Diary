@@ -1,31 +1,17 @@
 {
   "pages": [
     {
-      "path": "pages/home/home"
+      "path": "pages/pet/pet"
     },
     {
-      "path": "pages/greedySnake/greedySnake",
-      "style": {
-        "navigationBarTitleText": ""
-      }
-    },
-    {
-      "path": "pages/calendar/calendar",
-      "style": {
-        "navigationBarTitleText": "日历提醒"
-      }
-    },
-    {
-      "path": "pages/todo/todo",
-      "style": {
-        "navigationBarTitleText": "待办事项"
-      }
+      "path": "pages/pet/detail"
     }
   ],
   "globalStyle": {
+    "navigationStyle": "custom",
     "navigationBarTextStyle": "white",
-    "navigationBarTitleText": "百宝箱",
-    "navigationBarBackgroundColor": "#28272a",
-    "backgroundColor": "#28272a"
+    "navigationBarTitleText": "测试",
+    "navigationBarBackgroundColor": "#eff3ff",
+    "backgroundColor": "#eff3ff"
   }
 }
