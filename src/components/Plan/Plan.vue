@@ -4,45 +4,59 @@
       <text class="title">计划</text>
       <text class="handle" @click="showPopup">新增</text>
     </view>
-    <view class="plan" v-for="(plan, index) in state.dataList" :key="plan.id">
-      <view class="time-info">
-        <text class="tip">Today</text>
-        <text class="time">{{ plan.dueTime.split(" ")[1] }}</text>
-      </view>
 
-      <movable-area class="movable">
-        <movable-view
-          class="movable movable-view"
-          direction="horizontal"
-          inertia
-          damping="20"
-          out-of-bounds
-          :x="plan.x"
-          @touchstart="touchStart"
-          @touchend="touchEnd(index, $event)"
-        >
-          <view class="info" @click="hideHandle(index)">
-            <image class="avatar" src="@/assets/images/cat.png"></image>
-            <view class="detail">
-              <text class="title">{{ plan.title }}</text>
-              <text class="notes">{{ plan.notes }}</text>
+    <!-- 计划列表 -->
+    <template v-if="state.dataList.length">
+      <view class="plan" v-for="(plan, index) in state.dataList" :key="plan.id">
+        <view class="time-info">
+          <text class="tip">{{
+            isTodayPlan(plan.dueTime)
+              ? "Today"
+              : formatDate(new Date(plan.dueTime), "MM-dd")
+          }}</text>
+          <text class="time">{{
+            formatDate(new Date(plan.dueTime), "hh:mm")
+          }}</text>
+        </view>
+
+        <movable-area class="movable">
+          <movable-view
+            class="movable movable-view"
+            direction="horizontal"
+            inertia
+            damping="20"
+            out-of-bounds
+            :x="plan.x"
+            @touchstart="touchStart"
+            @touchend="touchEnd(index, $event)"
+          >
+            <view class="info" @click="hideHandle(index)">
+              <image class="avatar" src="@/assets/images/cat.png"></image>
+              <view class="detail">
+                <text class="title">{{ plan.title }}</text>
+                <text class="notes">{{ plan.notes }}</text>
+              </view>
+              <view class="time">
+                <text class="number">{{ plan.time }}</text>
+                <text class="unit">min</text>
+              </view>
             </view>
-            <view class="time">
-              <text class="number">{{ plan.time }}</text>
-              <text class="unit">min</text>
+            <view class="handle">
+              <view class="btn delete" @click="deletePlan(plan.id)">
+                <image class="icon" src="@/assets/svgs/trash-can.svg"></image
+              ></view>
+              <view class="btn done" @click="donePlan(plan.id)">
+                <image class="icon" src="@/assets/svgs/done.svg"></image>
+              </view>
             </view>
-          </view>
-          <view class="handle">
-            <view class="btn delete" @click="deletePlan(plan.id)">
-              <image class="icon" src="@/assets/svgs/trash-can.svg"></image
-            ></view>
-            <view class="btn done" @click="donePlan(plan.id)">
-              <image class="icon" src="@/assets/svgs/done.svg"></image>
-            </view>
-          </view>
-        </movable-view>
-      </movable-area>
-    </view>
+          </movable-view>
+        </movable-area>
+      </view>
+    </template>
+    <!-- 无计划时显示 -->
+    <template v-else>
+      <view class="empty">空空如也~</view>
+    </template>
 
     <!-- 新增计划 -->
     <MyPopup :show="state.isShowPopup" @hide="hidePopup">
@@ -65,7 +79,7 @@
               ><MyInput
                 maxlength="10"
                 type="number"
-                v-model="state.newPlan.time"
+                v-model.number="state.newPlan.time"
               />
             </MyFormItem>
             <MyFormItem label="备注"
@@ -76,14 +90,13 @@
         </view>
       </view>
     </MyPopup>
-
-    <MyMessage ref="myMessageRef"></MyMessage>
   </view>
 </template>
 
 <script setup lang="ts">
 import { reactive, watch, ref } from "vue";
 import { Plan } from "@/types/plan";
+import { formatDate } from "@/utils/methods";
 
 interface PlanMovableView extends Plan {
   x: number;
@@ -98,15 +111,12 @@ const props = defineProps({
 });
 
 const myForm: any = ref(null);
-const myMessageRef: any = ref(null);
 const state = reactive({
   dataList: [] as Array<PlanMovableView>,
   offset: 10,
   currentTouchX: 0,
   isShowPopup: false,
-  newPlan: {
-    dueTime: "",
-  } as Plan,
+  newPlan: {} as Plan,
   startTime: Date.now(),
   endTime: Date.now() + 1000 * 3600 * 24 * 180,
 });
@@ -177,6 +187,15 @@ function donePlan(id: string) {
 }
 
 function showPopup() {
+  state.newPlan = {
+    id: "",
+    avatar: "",
+    title: "",
+    time: 10,
+    dueTime: formatDate(new Date(), "yyyy-MM-dd hh:mm"),
+    notes: "",
+    isComplete: false,
+  };
   state.isShowPopup = true;
 }
 
@@ -189,12 +208,17 @@ function handleNewPlanSubmit() {
     if (valid) {
       emit("add", state.newPlan);
       hidePopup();
-      myMessageRef.value.show({
-        message: "修改成功",
-      });
     }
   });
 }
+
+/**
+ * @description: 是否是今天的计划
+ * @return {boolean}
+ */
+const isTodayPlan = (dueTime: string) => {
+  return new Date(dueTime).getDate() === new Date().getDate();
+};
 </script>
 
 <style lang="less" scoped>
@@ -204,7 +228,7 @@ function handleNewPlanSubmit() {
   .top {
     display: flex;
     justify-content: space-between;
-    align-items: flex-end;
+    align-items: center;
     margin-bottom: 0.8rem;
     .title {
       font-weight: bold;
@@ -215,6 +239,17 @@ function handleNewPlanSubmit() {
       font-size: 0.8rem;
     }
   }
+
+  .empty {
+    height: 200rpx;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: @my-color-primary;
+    opacity: 0.5;
+    font-size: 25rpx;
+  }
+
   .plan {
     display: flex;
     justify-content: space-between;

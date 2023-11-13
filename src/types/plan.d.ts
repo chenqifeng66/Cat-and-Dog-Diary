@@ -4,5 +4,6 @@ export interface Plan extends Object {
   avatar: string;
   title: string;
   notes: string;
-  time: string; // 用时
+  time: number; // 用时
+  isComplete: boolean; // 是否完成
 }

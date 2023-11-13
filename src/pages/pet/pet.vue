@@ -204,7 +204,6 @@ function handleNewPetSubmit() {
   myForm.value.validate((valid: boolean) => {
     if (valid) {
       hidePopup();
-      state.newPet.id = petStore.newId;
       petStore.addPetToLast(state.newPet);
       myMessageRef.value.show({
         message: "添加成功",
@@ -213,13 +212,17 @@ function handleNewPetSubmit() {
   });
 }
 
-function deletePlan(index: number) {
+function deletePlan(id: string) {
   myDialog.value.open({
     title: "删除计划",
     content: "确认删除该计划？",
     confirm() {
-      const title = state.planList[index].title;
-      state.planList.splice(index, 1);
+      const plan = petStore.getPetPlanById(state.selectedPetId, id);
+      let title = "";
+      if (plan) {
+        title = plan.title;
+      }
+      petStore.deletePetPlanById(state.selectedPetId, id);
       myMessageRef.value.show({
         message: `删除【${title}】`,
       });
@@ -227,11 +230,15 @@ function deletePlan(index: number) {
   });
 }
 
-function donePlan(index: number) {
-  const title = state.planList[index].title;
-  state.planList.splice(index, 1);
+function donePlan(id: string) {
+  const plan = petStore.getPetPlanById(state.selectedPetId, id);
+  let title = "";
+  if (plan) {
+    title = plan.title;
+  }
+  petStore.completePetPlanById(state.selectedPetId, id);
   myMessageRef.value.show({
-    message: title,
+    message: `完成【${title}】`,
   });
 }
 
@@ -240,11 +247,10 @@ function onClickPet(id: string) {
 }
 
 function addPlan(plan: Plan) {
-  if (selectedPet.value) {
-    const pet = { ...selectedPet.value };
-    pet.plans.push(plan);
-    petStore.editPetById(pet.id, pet);
-  }
+  petStore.addPetPlanById(state.selectedPetId, plan);
+  myMessageRef.value.show({
+    message: "添加成功",
+  });
 }
 </script>
 
@@ -352,6 +358,7 @@ function addPlan(plan: Plan) {
       }
       &.active {
         transform: scale(1.05);
+        box-shadow: 1px 1px 5px rgba(170, 105, 255, 0.5);
       }
     }
 

@@ -1,6 +1,11 @@
 <template>
   <view class="radio" @click="checked">
-    <view class="check">
+    <view
+      class="check"
+      :class="{
+        active: isChecked,
+      }"
+    >
       <view v-show="isChecked" class="active"></view>
     </view>
     <view
@@ -49,6 +54,9 @@ function checked() {
     margin-right: 0.5rem;
     box-sizing: border-box;
     position: relative;
+    &.active {
+      border-color: @my-color-primary;
+    }
     .active {
       width: 0.5rem;
       height: 0.5rem;
@@ -58,6 +66,7 @@ function checked() {
       transform: translate(-50%, -50%);
       background: @my-color-primary;
       border-radius: 50%;
+
       animation: active 0.5s 1;
 
       @keyframes active {
@@ -74,7 +83,6 @@ function checked() {
   }
   .active {
     color: @my-color-primary;
-    border-color: @my-color-primary;
   }
 }
 </style>

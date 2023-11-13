@@ -25,7 +25,7 @@
               class="item"
               v-for="(item, index) in state.date"
               :key="index"
-              >{{ formatDate(item) }}</view
+              >{{ formatDateShow(item) }}</view
             >
           </picker-view-column>
         </template>
@@ -51,7 +51,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, reactive } from "vue";
-import { generateArray } from "../../utils/methods";
+import { generateArray, formatDate } from "@/utils/methods";
 
 interface Date {
   year: string;
@@ -62,7 +62,7 @@ interface Date {
 const emit = defineEmits(["update:modelValue", "confirm"]);
 const props = defineProps({
   modelValue: {
-    type: String || Number,
+    type: [String, Number],
     required: true,
   },
   startTime: {
@@ -177,6 +177,11 @@ const modelValueDate = computed(() => {
 
 onMounted(() => {
   initData();
+
+  // emit(
+  //   "update:modelValue",
+  //   formatDate(modelValueDate.value, "yyyy-MM-dd hh:mm")
+  // );
 });
 
 /**
@@ -260,8 +265,6 @@ const initData = () => {
         });
       });
     });
-    state.hours = HOUR_RANGE;
-    state.minutes = MINUTE_RANGE;
   }
   // 时分数据
   if (props.time) {
@@ -354,16 +357,32 @@ const hidePopup = () => {
   state.show = false;
 };
 
-const formatDate = (date: Date) => {
+const formatDateShow = (date: Date) => {
   const { year, month, day } = date;
+  const currentDate = new Date();
+  let currentYear = currentDate.getFullYear().toString();
+  let currentMonth = (currentDate.getMonth() + 1).toString();
+  let currentDay = currentDate.getDate().toString();
+  if (year === currentYear) {
+    if (parseInt(currentMonth) < 10) {
+      currentMonth = "0" + currentMonth;
+    }
+    if (month === currentMonth) {
+      if (parseInt(currentDay) < 10) {
+        currentDay = "0" + currentDay;
+      }
+      if (day === currentDay) {
+        return "今日";
+      }
+    }
+  }
   return `${parseInt(year) % 100}年${month}月${day}日`;
 };
 
 // 选择器选择时，计算下一列选择器的范围
-const change = (e) => {
+const change = (e: any) => {
   state.selectedIndexs = e.detail.value;
   const value = e.detail.value;
-  console.log(value);
 
   if (props.date && props.time) {
     // 日期时间选择器

@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import { Pet } from "@/types/pet";
+import { Plan } from "@/types/plan";
 
 const STORAGE_KEY_PET_LIST = "pet_list";
 
@@ -42,6 +43,15 @@ export const usePetStore = defineStore("pet", {
       this.savePetListToStorage();
     },
     addPetToLast(pet: Pet): void {
+      // 递增 pet id
+      pet.id = "1";
+      if (this.petList.length > 0) {
+        const lastIndex = this.petList.length - 1;
+        const lastPetId = this.petList[lastIndex].id;
+        if (lastPetId) {
+          pet.id = (Number.parseInt(lastPetId) + 1).toString();
+        }
+      }
       this.petList.push(pet);
       this.savePetListToStorage();
     },
@@ -57,6 +67,51 @@ export const usePetStore = defineStore("pet", {
     setPetList(petList: Array<Pet>): void {
       this.petList = petList;
       this.savePetListToStorage();
+    },
+    getPetPlanById(petId: string, planId: string): Plan | undefined {
+      let plan = undefined;
+      const pet = this.getPetById(petId);
+      if (pet && pet.plans) {
+        plan = pet.plans.find((plan) => plan.id === planId);
+      }
+      return plan;
+    },
+    addPetPlanById(petId: string, plan: Plan): void {
+      this.petList.forEach((pet) => {
+        if (pet.id === petId) {
+          // 递增 plan id
+          if (pet.plans && pet.plans.length) {
+            const lastIndex = pet.plans.length - 1;
+            const lastPlanId = pet.plans[lastIndex].id;
+
+            if (lastPlanId) {
+              plan.id = (parseInt(lastPlanId) + 1).toString();
+            }
+          } else {
+            pet.plans = [];
+            plan.id = `${petId}-1`;
+          }
+          console.log(plan.id);
+          pet.plans.push(plan);
+          this.savePetListToStorage();
+          return;
+        }
+      });
+    },
+    deletePetPlanById(petId: string, planId: string): void {
+      this.petList.forEach((pet) => {
+        if (pet.id === petId) {
+          pet.plans = pet.plans.filter((plan) => plan.id !== planId);
+          this.savePetListToStorage();
+          return;
+        }
+      });
+    },
+    completePetPlanById(petId: string, planId: string): void {
+      const plan = this.getPetPlanById(petId, planId);
+      if (plan) {
+        plan.isComplete = true;
+      }
     },
     savePetListToStorage(): void {
       uni.setStorageSync(STORAGE_KEY_PET_LIST, this.petList);

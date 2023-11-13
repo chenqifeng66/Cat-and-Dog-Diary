@@ -19,6 +19,9 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
+    // 抑制隐式索引错误
+    "suppressImplicitAnyIndexErrors":true,
+    "ignoreDeprecations": "5.0",
 
     "baseUrl": ".",
     "paths": {
