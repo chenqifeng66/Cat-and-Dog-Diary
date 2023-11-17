@@ -116,25 +116,9 @@ const state = reactive({
     sex: "母",
     category: "cat",
     color: "白",
-    weight: ".5",
+    weight: "0.5",
     plans: [],
   } as Pet,
-  planList: [
-    {
-      dueTime: "2023/10/08 14:15",
-      avatar: "",
-      title: "喂罐头",
-      notes: "半罐",
-      time: "40",
-    },
-    {
-      dueTime: "2023/10/08 16:15",
-      avatar: "",
-      title: "喂化毛膏",
-      notes: "5cm",
-      time: "40",
-    },
-  ],
 });
 const petList = computed(() => petStore.petList);
 const selectedPet = computed(() => {
@@ -159,17 +143,10 @@ function onLongPress(index: number) {
 }
 
 function toDetail(id: string) {
-  if (id) {
-    if (petStore.getPetById(id)) {
-      uni.navigateTo({
-        url: `/pages/pet/detail?id=${id}`,
-      });
-    } else {
-      myMessageRef.value.show({
-        message: "查找不到该宠物信息",
-        type: "error",
-      });
-    }
+  if (id && petStore.getPetById(id)) {
+    uni.navigateTo({
+      url: `/pages/pet/detail?id=${id}`,
+    });
   } else {
     myMessageRef.value.show({
       message: "查找不到该宠物信息",

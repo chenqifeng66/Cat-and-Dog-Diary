@@ -85,13 +85,14 @@ export const usePetStore = defineStore("pet", {
             const lastPlanId = pet.plans[lastIndex].id;
 
             if (lastPlanId) {
-              plan.id = (parseInt(lastPlanId) + 1).toString();
+              const id = parseInt(lastPlanId.split("-")[1]) + 1;
+              plan.id = `${petId}-${id}`;
             }
           } else {
             pet.plans = [];
             plan.id = `${petId}-1`;
           }
-          console.log(plan.id);
+
           pet.plans.push(plan);
           this.savePetListToStorage();
           return;
@@ -111,6 +112,7 @@ export const usePetStore = defineStore("pet", {
       const plan = this.getPetPlanById(petId, planId);
       if (plan) {
         plan.isComplete = true;
+        this.savePetListToStorage();
       }
     },
     savePetListToStorage(): void {

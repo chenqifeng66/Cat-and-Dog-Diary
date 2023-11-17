@@ -116,7 +116,11 @@
           </MyFormItem>
 
           <MyFormItem label="体重/kg" prop="weight"
-            ><MyInput name="weight" v-model="state.editPetDetails.weight" />
+            ><MyInput
+              name="weight"
+              type="number"
+              v-model="state.editPetDetails.weight"
+            />
           </MyFormItem>
 
           <button class="submit" @click="handleEditPetSubmit">完成</button>

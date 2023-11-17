@@ -7,7 +7,14 @@
 
     <!-- 计划列表 -->
     <template v-if="state.dataList.length">
-      <view class="plan" v-for="(plan, index) in state.dataList" :key="plan.id">
+      <view
+        v-for="(plan, index) in state.dataList"
+        :key="plan.id"
+        class="plan"
+        :class="{
+          complete: plan.isComplete,
+        }"
+      >
         <view class="time-info">
           <text class="tip">{{
             isTodayPlan(plan.dueTime)
@@ -22,6 +29,9 @@
         <movable-area class="movable">
           <movable-view
             class="movable movable-view"
+            :class="{
+              'one-btn': plan.isComplete,
+            }"
             direction="horizontal"
             inertia
             damping="20"
@@ -45,7 +55,11 @@
               <view class="btn delete" @click="deletePlan(plan.id)">
                 <image class="icon" src="@/assets/svgs/trash-can.svg"></image
               ></view>
-              <view class="btn done" @click="donePlan(plan.id)">
+              <view
+                v-if="!plan.isComplete"
+                class="btn done"
+                @click="donePlan(plan.id)"
+              >
                 <image class="icon" src="@/assets/svgs/done.svg"></image>
               </view>
             </view>
@@ -140,12 +154,23 @@ const rules = {
     },
   ],
 };
+
 watch(
   () => props.data,
   (newVal) => {
-    state.dataList = newVal.map((item) => {
+    // 给每个计划添加 x 参数，控制滑动位置
+    const dataList = newVal.map((item) => {
       return { ...item, x: 0 } as PlanMovableView;
     });
+    // 已完成的计划
+    const completeds = dataList.filter((item) => item.isComplete);
+    // 未完成的计划
+    const inCompleteds = dataList.filter((item) => !item.isComplete);
+    // 对开始时间进行排序
+    completeds.sort((a, b) => Date.parse(b.dueTime) - Date.parse(a.dueTime));
+    inCompleteds.sort((a, b) => Date.parse(b.dueTime) - Date.parse(a.dueTime));
+    // 以未完成在前，已完成在后的组合
+    state.dataList = inCompleteds.concat(completeds);
   },
   { immediate: true, deep: true }
 );
@@ -255,11 +280,19 @@ const isTodayPlan = (dueTime: string) => {
     justify-content: space-between;
     margin-bottom: 0.5rem;
 
+    &.complete {
+      opacity: 0.5;
+    }
+
     .movable {
-      width: 100vw;
+      width: 99vw;
       height: 3.8rem;
       overflow: hidden;
       margin-left: 1rem;
+
+      &.one-btn {
+        width: 87vw;
+      }
     }
     .movable-view {
       display: flex;
