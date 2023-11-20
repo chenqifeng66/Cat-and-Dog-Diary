@@ -95,6 +95,7 @@ import { ref, reactive, computed, onMounted } from "vue";
 import { usePetStore } from "@/stores/pet";
 import { type Pet } from "@/types/pet";
 import { type Plan } from "@/types/plan";
+import cat from "@/assets/images/cat.png";
 
 const rules = {
   name: [{ required: true, message: "请填写名称" }],
@@ -110,7 +111,7 @@ const state = reactive({
   selectedPetId: "",
   newPet: {
     id: "",
-    avatar: "",
+    avatar: cat,
     name: "",
     age: "0.5",
     sex: "母",

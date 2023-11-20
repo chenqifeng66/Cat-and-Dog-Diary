@@ -1,6 +1,6 @@
 <template>
-  <view v-if="show"
-    ><view
+  <view v-if="show">
+    <view
       class="popup-container"
       :class="{
         bottom: position === 'bottom',
@@ -77,8 +77,8 @@ function stop() {}
     // }
 
     &.bottom {
-      width: 100%;
-      height: 50%;
+      width: 100vw;
+      height: 50vh;
       border-radius: 2rem 2rem 0 0;
     }
   }

@@ -51,7 +51,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, reactive } from "vue";
-import { generateArray, formatDate } from "@/utils/methods";
+import { generateArray } from "@/utils/methods";
 
 interface Date {
   year: string;

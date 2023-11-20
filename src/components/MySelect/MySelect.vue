@@ -10,7 +10,13 @@
         src="@/assets/svgs/down.svg"
       ></image>
     </view>
-    <view v-show="isShowOptions" class="option-list">
+    <view
+      v-show="isShowOptions"
+      class="option-list"
+      :style="{
+        maxHeight: height,
+      }"
+    >
       <slot></slot>
     </view>
   </view>
@@ -27,6 +33,10 @@ import { computed, ref, provide } from "vue";
 const emit = defineEmits(["update:modelValue"]);
 const props = defineProps({
   modelValue: [String, Number, Boolean, Object, Array],
+  height: {
+    type: String,
+    default: "auto",
+  },
 });
 
 const isShowOptions = ref(false);

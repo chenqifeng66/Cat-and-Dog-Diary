@@ -1,10 +1,7 @@
 <template>
   <view class="container">
     <view class="avatar">
-      <image
-        class="icon"
-        :src="petDetails.avatar || '../../src/assets/images/Cat-logo.png'"
-      ></image>
+      <image class="icon" :src="petDetails.avatar"></image>
     </view>
 
     <view class="info">
@@ -62,25 +59,32 @@
         <MyForm :model="state.editPetDetails" :rules="rules" ref="myFormRef">
           <MyFormItem label="头像">
             <view class="form-avatar">
-              <view class="avatar-list"
-                ><image
+              <view class="avatar-list">
+                <!-- 宠物头像 -->
+                <image
                   v-if="state.editPetDetails.avatar"
                   class="avatar"
                   :class="{
-                    active: state.isChooseNewAvatar,
+                    active:
+                      state.editPetDetails.avatar !== cat
+                        ? state.isChooseNewAvatar
+                        : true,
                   }"
                   :src="state.editPetDetails.avatar"
                   @click="chooseAvatar(true, state.editPetDetails.avatar)"
                 ></image>
+                <!-- 默认头像 -->
                 <image
+                  v-if="state.editPetDetails.avatar !== cat"
                   class="avatar"
                   :class="{
                     active: !state.isChooseNewAvatar,
                   }"
-                  src="@/assets/images/Cat-logo.png"
+                  :src="cat"
                   @click="chooseAvatar(false)"
                 ></image
               ></view>
+              <!-- 上传按钮 -->
               <image
                 class="icon"
                 src="@/assets/svgs/upload.svg"
@@ -105,7 +109,11 @@
           ></MyFormItem>
 
           <MyFormItem label="品种">
-            <MySelect name="cate" v-model="state.editPetDetails.category">
+            <MySelect
+              name="cate"
+              v-model="state.editPetDetails.category"
+              :height="'8rem'"
+            >
               <MyOption
                 v-for="cate in state.categoryList"
                 :key="cate.value"
@@ -138,6 +146,7 @@ import { type Pet } from "@/types/pet";
 import { type Plan } from "@/types/plan";
 import { onLoad } from "@dcloudio/uni-app";
 import { usePetStore } from "@/stores/pet";
+import cat from "@/assets/images/cat.png";
 
 const myFormRef: any = ref(null);
 const myMessageRef: any = ref(null);
@@ -184,7 +193,27 @@ const state = reactive({
     },
     {
       value: "2",
-      label: "逻辑",
+      label: "暹罗",
+    },
+    {
+      value: "3",
+      label: "英短",
+    },
+    {
+      value: "4",
+      label: "美短",
+    },
+    {
+      value: "5",
+      label: "中华田园",
+    },
+    {
+      value: "6",
+      label: "大橘",
+    },
+    {
+      value: "7",
+      label: "缅因",
     },
   ],
 });
@@ -328,8 +357,8 @@ function addPlan(plan: Plan) {
     justify-content: center;
     position: relative;
     .icon {
-      width: 80%;
-      height: 80%;
+      width: 100%;
+      height: 100%;
     }
     .upload {
       width: 2rem;
@@ -456,7 +485,6 @@ function addPlan(plan: Plan) {
           width: 3rem;
           height: 3rem;
           border-radius: 50%;
-          background: @my-color-primary;
           box-sizing: border-box;
           margin-right: 1rem;
           opacity: 0.3;

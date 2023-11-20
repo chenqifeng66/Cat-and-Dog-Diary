@@ -41,7 +41,7 @@
             @touchend="touchEnd(index, $event)"
           >
             <view class="info" @click="hideHandle(index)">
-              <image class="avatar" src="@/assets/images/cat.png"></image>
+              <image class="avatar" src="@/assets/svgs/plan.svg"></image>
               <view class="detail">
                 <text class="title">{{ plan.title }}</text>
                 <text class="notes">{{ plan.notes }}</text>
@@ -322,8 +322,8 @@ const isTodayPlan = (dueTime: string) => {
       align-items: center;
 
       .avatar {
-        height: 2.5rem;
-        width: 2.5rem;
+        height: 2rem;
+        width: 2rem;
         border-radius: 0.6rem;
       }
 
