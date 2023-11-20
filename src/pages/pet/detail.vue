@@ -283,7 +283,7 @@ function chooseAvatar(isChooseNewAvatar: boolean, newAvatarUrl?: string) {
   if (isChooseNewAvatar && newAvatarUrl) {
     state.editPetDetails.avatar = newAvatarUrl;
   } else {
-    state.editPetDetails.avatar = "";
+    state.editPetDetails.avatar = cat;
   }
 }
 
