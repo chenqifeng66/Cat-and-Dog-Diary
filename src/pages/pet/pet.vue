@@ -383,3 +383,4 @@ function addPlan(plan: Plan) {
   }
 }
 </style>
+@/typings/pet@/typings/plan

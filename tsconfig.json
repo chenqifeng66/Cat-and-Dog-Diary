@@ -35,6 +35,6 @@
     "@types/node"
   ]
   },
-  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue","src/types/module.ts"],
+  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue","src/typings/module.tsts"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

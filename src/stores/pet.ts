@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
-import { Pet } from "@/types/pet";
-import { Plan } from "@/types/plan";
+import { Pet } from "@/typings/pet";
+import { Plan } from "@/typings/plan";
 
 const STORAGE_KEY_PET_LIST = "pet_list";
 
