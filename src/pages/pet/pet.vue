@@ -129,6 +129,8 @@ const selectedPet = computed(() => {
 
 onMounted(() => {
   petStore.initPetList();
+  console.log(petStore);
+  
   if (petList.value.length) {
     state.selectedPetId = petList.value[0].id;
   }
