@@ -20,7 +20,7 @@
 
 <script setup lang="ts">
 import { onLoad, onReachBottom } from '@dcloudio/uni-app';
-import { getNoties } from '@/apis/index.js'
+import { getNoties } from '@/apis/community.js'
 import { reactive } from 'vue';
 
 // enum Status { more, loading, noMore }
@@ -44,8 +44,7 @@ onReachBottom(() => {
 
 const getNoteList = async () => {
     state.status = 'loading'
-    const res = await getNoties({ page: state.page })
-    const { noties, current_page, total } = res.data
+    const { noties, current_page, total } = await getNoties({ page: state.page })
 
     if (state.page === current_page) {
         state.status = 'noMore'
@@ -69,7 +68,7 @@ const getNoteList = async () => {
         width: 100%;
         text-align: center;
         font-size: 40rpx;
-        font-family: 800;
+        font-weight: bold;
         margin-bottom: 20rpx;
     }
 
