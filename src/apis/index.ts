@@ -1,6 +1,6 @@
 const BASE_URL = 'https://mock.apifox.com/m1/3787137-0-default'
 
-export const get = (url, query) => {
+export const get = (url:string, query:any = {}) => {
     return new Promise((resolve) => {
         uni.request({
             url: BASE_URL + url,
@@ -12,7 +12,7 @@ export const get = (url, query) => {
     })
 }
 
-export const post = (url, body) => {
+export const post = (url:string, body:any = {}) => {
     return new Promise((resolve) => {
         uni.request({
             method: "POST",

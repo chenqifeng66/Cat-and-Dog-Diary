@@ -49,11 +49,7 @@
     </view>
 
     <!-- 编辑信息 -->
-    <MyPopup
-      v-if="state.isShowEditPopup"
-      :show="state.isShowEditPopup"
-      @hide="hidePopup"
-    >
+    <MyPopup v-if="state.isShowEditPopup" :show="state.isShowEditPopup" @hide="hidePopup">
       <view class="popup">
         <view class="title">编辑</view>
         <MyForm :model="state.editPetDetails" :rules="rules" ref="myFormRef">
@@ -61,35 +57,20 @@
             <view class="form-avatar">
               <view class="avatar-list">
                 <!-- 宠物头像 -->
-                <image
-                  v-if="state.editPetDetails.avatar"
-                  class="avatar"
-                  :class="{
-                    active:
-                      state.editPetDetails.avatar !== cat
-                        ? state.isChooseNewAvatar
-                        : true,
-                  }"
-                  :src="state.editPetDetails.avatar"
-                  @click="chooseAvatar(true, state.editPetDetails.avatar)"
-                ></image>
+                <image v-if="state.editPetDetails.avatar" class="avatar" :class="{
+                  active:
+                    state.editPetDetails.avatar !== cat
+                      ? state.isChooseNewAvatar
+                      : true,
+                }" :src="state.editPetDetails.avatar" @click="chooseAvatar(true, state.editPetDetails.avatar)">
+                </image>
                 <!-- 默认头像 -->
-                <image
-                  v-if="state.editPetDetails.avatar !== cat"
-                  class="avatar"
-                  :class="{
-                    active: !state.isChooseNewAvatar,
-                  }"
-                  :src="cat"
-                  @click="chooseAvatar(false)"
-                ></image
-              ></view>
+                <image v-if="state.editPetDetails.avatar !== cat" class="avatar" :class="{
+                  active: !state.isChooseNewAvatar,
+                }" :src="cat" @click="chooseAvatar(false)"></image>
+              </view>
               <!-- 上传按钮 -->
-              <image
-                class="icon"
-                src="@/assets/svgs/upload.svg"
-                @click="uploadAvatar"
-              ></image>
+              <image class="icon" src="@/assets/svgs/upload.svg" @click="uploadAvatar"></image>
             </view>
           </MyFormItem>
           <MyFormItem label="性别">
@@ -98,37 +79,22 @@
               <MyRadio value="母" label="母" />
             </MyRadioGroup>
           </MyFormItem>
-          <MyFormItem label="颜色"
-            ><MySelect name="color" v-model="state.editPetDetails.color">
-              <MyOption
-                v-for="color in state.colorList"
-                :key="color.value"
-                :label="color.label"
-                :value="color.value"
-              ></MyOption> </MySelect
-          ></MyFormItem>
-
-          <MyFormItem label="品种">
-            <MySelect
-              name="cate"
-              v-model="state.editPetDetails.category"
-              :height="'8rem'"
-            >
-              <MyOption
-                v-for="cate in state.categoryList"
-                :key="cate.value"
-                :label="cate.label"
-                :value="cate.value"
-              ></MyOption>
+          <MyFormItem label="颜色">
+            <MySelect name="color" v-model="state.editPetDetails.color">
+              <MyOption v-for="color in state.colorList" :key="color.id" :label="color.label" :value="color.id">
+              </MyOption>
             </MySelect>
           </MyFormItem>
 
-          <MyFormItem label="体重/kg" prop="weight"
-            ><MyInput
-              name="weight"
-              type="number"
-              v-model="state.editPetDetails.weight"
-            />
+          <MyFormItem label="品种">
+            <MySelect name="cate" v-model="state.editPetDetails.category" :height="'8rem'">
+              <MyOption v-for="cate in state.categoryList" :key="cate.id" :label="cate.label" :value="cate.id">
+              </MyOption>
+            </MySelect>
+          </MyFormItem>
+
+          <MyFormItem label="体重/kg" prop="weight">
+            <MyInput name="weight" type="number" v-model="state.editPetDetails.weight" />
           </MyFormItem>
 
           <button class="submit" @click="handleEditPetSubmit">完成</button>
@@ -147,6 +113,7 @@ import { type Plan } from "@/types/plan";
 import { onLoad } from "@dcloudio/uni-app";
 import { usePetStore } from "@/stores/pet";
 import cat from "@/assets/images/cat.png";
+import { getColors, getPetCategories } from '@/apis/pet'
 
 const myFormRef: any = ref(null);
 const myMessageRef: any = ref(null);
@@ -172,50 +139,8 @@ const state = reactive({
       time: "40",
     },
   ],
-  colorList: [
-    {
-      value: "1",
-      label: "白",
-    },
-    {
-      value: "2",
-      label: "白棕",
-    },
-    {
-      value: "3",
-      label: "黑",
-    },
-  ],
-  categoryList: [
-    {
-      value: "1",
-      label: "布偶",
-    },
-    {
-      value: "2",
-      label: "暹罗",
-    },
-    {
-      value: "3",
-      label: "英短",
-    },
-    {
-      value: "4",
-      label: "美短",
-    },
-    {
-      value: "5",
-      label: "中华田园",
-    },
-    {
-      value: "6",
-      label: "大橘",
-    },
-    {
-      value: "7",
-      label: "缅因",
-    },
-  ],
+  colorList: [],
+  categoryList: [],
 });
 const rules = {
   weight: [
@@ -257,18 +182,30 @@ onLoad((option: any) => {
     petStore.initPetList();
     state.petId = option.id;
   }
+  getColorList()
+  getPetCategoryList()
 });
 
 const petColor = computed(() => {
-  return state.colorList.find((color) => color.value === petDetails.value.color)
+  return state.colorList.find((color) => color.id === petDetails.value.color)
     ?.label;
 });
 
 const petCategory = computed(() => {
   return state.categoryList.find(
-    (cate) => cate.value === petDetails.value.category
+    (cate) => cate.id === petDetails.value.category
   )?.label;
 });
+
+const getColorList = async () => {
+  const { colors } = await getColors()
+  state.colorList = colors
+}
+
+const getPetCategoryList = async () => {
+  const { pet_categories } = await getPetCategories({ type: petDetails.value.category })
+  state.categoryList = pet_categories
+}
 
 function hidePopup() {
   state.isShowEditPopup = false;
@@ -356,10 +293,12 @@ function addPlan(plan: Plan) {
     align-items: center;
     justify-content: center;
     position: relative;
+
     .icon {
       width: 100%;
       height: 100%;
     }
+
     .upload {
       width: 2rem;
       height: 2rem;
@@ -368,6 +307,7 @@ function addPlan(plan: Plan) {
       bottom: 15%;
     }
   }
+
   .info {
     width: 100%;
     height: 70vh;
@@ -392,6 +332,7 @@ function addPlan(plan: Plan) {
         width: 2rem;
         height: 2rem;
       }
+
       &::before {
         content: "";
         position: absolute;
@@ -404,21 +345,26 @@ function addPlan(plan: Plan) {
         z-index: 2;
         border-radius: 2rem 0 0 0;
       }
+
       .top {
         display: flex;
         justify-content: space-between;
         align-items: center;
+
         .left {
           display: flex;
           flex-direction: column;
+
           .name {
             font-weight: bold;
             font-size: 1.5rem;
           }
+
           .age {
             color: @my-text-color-grey;
           }
         }
+
         .right {
           .edit {
             width: 2rem;
@@ -426,6 +372,7 @@ function addPlan(plan: Plan) {
             display: flex;
             justify-content: center;
             align-items: center;
+
             .icon {
               width: 80%;
               height: 80%;
@@ -433,8 +380,10 @@ function addPlan(plan: Plan) {
           }
         }
       }
+
       .tags {
         display: flex;
+
         .tag {
           width: 25%;
           display: flex;
@@ -442,18 +391,22 @@ function addPlan(plan: Plan) {
           align-items: center;
           padding-top: 1rem;
           position: relative;
+
           .tag-icon {
             margin-bottom: 0.3rem;
             font-size: 1.6rem;
           }
+
           .tag-name {
             color: @my-text-color-grey;
             font-size: 0.6rem;
             margin-bottom: 0.3rem;
           }
+
           .tag-info {
             font-weight: bold;
           }
+
           .divider {
             position: absolute;
             right: 0;
@@ -467,20 +420,25 @@ function addPlan(plan: Plan) {
       }
     }
   }
+
   .popup {
     width: 60vw;
+
     .title {
       font-weight: bold;
       font-size: 1.2rem;
       color: @my-color-primary;
       margin-bottom: 1rem;
     }
+
     .form-avatar {
       display: flex;
       justify-content: space-between;
       align-items: center;
+
       .avatar-list {
         display: flex;
+
         .avatar {
           width: 3rem;
           height: 3rem;
@@ -488,11 +446,13 @@ function addPlan(plan: Plan) {
           box-sizing: border-box;
           margin-right: 1rem;
           opacity: 0.3;
+
           &.active {
             opacity: 1;
           }
         }
       }
+
       .icon {
         width: 2rem;
         height: 2rem;
@@ -505,6 +465,7 @@ function addPlan(plan: Plan) {
       font-size: 1rem;
       border-radius: 0.8rem;
       margin-top: 2rem;
+
       &::after {
         border: none;
       }
